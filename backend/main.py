@@ -1,28 +1,33 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
-from backend.services.analytics import calculate_analytics
+from fastapi import FastAPI    # Imports the FastAPI class from the FastAPI library
+from pydantic import BaseModel    # pydantic used for data validation, data parsing, type checking
+from typing import List    # imports python type hints used for List[str]
+from backend.services.analytics import calculate_analytics    # Imports your custom function from analytics.py
 
-app = FastAPI()
+app = FastAPI()    # Creates your API application object.
 
 # Temporary in-memory storage
-transactions_db = []
+transactions_db = []    # A Python list acting as a fake database
 
-# Data model
+# Data model    Defines the structure of incoming data: a request schema
 class Transaction(BaseModel):
     amount: float
     category: str
     description: str
 
+# REST API
 
 # Route 1: Add transaction
-@app.post("/add_transaction")
+@app.post("/add_transaction")    # API route - Create an API endpoint
+# POST is used to send data, create new reocrds
+# FastAPI registers: "/add_transaction"
 def add_transaction(transaction: Transaction):
     transactions_db.append(transaction.dict())  # ✅ convert to dict
+    # Converts Pydantic object → Python dictionary
     return {"message": "Transaction added successfully"}
+    # FastAPI automatically converts Python dict → JSON response and send back to browser
 
 # Route 2: Get all transactions
-@app.get("/transactions")
+@app.get("/transactions")    # used to fetch data and read info
 def get_transactions():
     return transactions_db
 
@@ -30,5 +35,5 @@ def get_transactions():
 # Route 3: Get analytics
 @app.get("/analytics")
 def get_analytics():
-    return calculate_analytics(transactions_db)
+    return calculate_analytics(transactions_db)    #Passes all transactions into calculate_analytics()
 
