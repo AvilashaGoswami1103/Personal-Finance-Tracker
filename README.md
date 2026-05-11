@@ -59,7 +59,7 @@ Time-series forecasting
 Detect fraud-like behavior
 
 
-
+Implemented an NLP-inspired transaction categorization engine integrated into a FastAPI backend.
 
 
 
