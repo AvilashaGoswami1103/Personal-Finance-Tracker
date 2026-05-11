@@ -8,7 +8,7 @@ def calculate_analytics(transactions):
         # Checks if the transaction’s category already exists in the dictionary.
         # If yes, add the amount to the existing total.
         # If no, create a new entry with the amount.
-        if t.category in category_breakdown:
+        if t["category"] in category_breakdown:
             category_breakdown[t["category"]] += t["amount"]
         else:
             category_breakdown[t["category"]] = t["amount"]

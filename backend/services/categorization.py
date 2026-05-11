@@ -1,3 +1,5 @@
+# Rule-based NLP classification
+
 def categorize_transaction(description):
 
     description = description.lower()
