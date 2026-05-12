@@ -60,6 +60,24 @@ Detect fraud-like behavior
 
 
 Implemented an NLP-inspired transaction categorization engine integrated into a FastAPI backend.
+Transaction Data
+        ↓
+AI Categorization
+        ↓
+Analytics Engine
+        ↓
+Insights
+
+How the main.py code works:
+Client/User
+     ↓
+FastAPI Routes (main.py)
+     ↓
+Services Layer
+     ↓
+AI + Analytics Logic
+     ↓
+Response Returned
 
 
 
