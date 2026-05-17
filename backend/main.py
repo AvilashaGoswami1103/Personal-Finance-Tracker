@@ -5,7 +5,13 @@ from typing import List    # imports python type hints used for List[str]
 from backend.services.analytics import calculate_analytics    # Imports your custom function from analytics.py
 from backend.services.categorization import categorize_transaction
 
+from backend.database.db import engine
+from backend.database.db import Base
+from backend.database.db import SessionLocal
+
+from backend.models.transaction_model import TransactionDB
 app = FastAPI()    # Creates your API application object.
+Base.metadata.create_all(bind=engine)
 
 # Temporary in-memory storage
 transactions_db = []    # A Python list acting as a fake database
@@ -55,21 +61,21 @@ def add_transaction(transaction: Transaction):
         transaction.description
     )
 
-    db = SessionLocal()
+    db = SessionLocal()     # opens a session connected to our SQLite database
 
-    new_transaction = TransactionDB(
+    new_transaction = TransactionDB(    # Creates a new row (TransactionDB is your ORM model mapped to a table)
         amount=transaction.amount,
         description=transaction.description,
         category=predicted_category
     )
 
-    db.add(new_transaction)
+    db.add(new_transaction)     # stage the new row
 
-    db.commit()
+    db.commit()     # write it permanently to database
 
-    db.refresh(new_transaction)
+    db.refresh(new_transaction)     # reload the object with its database-assigned values (like id).
 
-    db.close()
+    db.close()  # cleanly close the session
 
     return {
         "message": "Transaction added successfully",
@@ -80,9 +86,10 @@ def add_transaction(transaction: Transaction):
 @app.get("/transactions")
 def get_transactions():
 
-    db = SessionLocal()
+    db = SessionLocal()     # open a session connected to SQLite database
 
     transactions = db.query(TransactionDB).all()
+    # queries all rows from the transactions table 
 
     db.close()
 
@@ -105,6 +112,8 @@ def get_analytics():
         }
         for t in transactions
     ])
+    # Pulls all transactions from the DB.
+    # Passes them into your custom calculate_analytics function for summaries.
 
     db.close()
 
