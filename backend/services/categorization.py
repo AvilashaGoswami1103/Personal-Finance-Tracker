@@ -1,49 +1,68 @@
 # Rule-based NLP classification
 
+
+import joblib
+
+# Load trained model
+model = joblib.load("backend/models/category_model.pkl")
+
+# Load vectorizer
+vectorizer = joblib.load("backend/models/vectorizer.pkl")
+
 def categorize_transaction(description):
 
-    description = description.lower()
+    # Convert input text into vectors
+    description_vector = vectorizer.transform([description])
 
-    # Food category
-    food_keywords = [
-        "swiggy",
-        "zomato",
-        "restaurant",
-        "food",
-        "pizza",
-        "burger"
-    ]
+    # Predict category
+    prediction = model.predict(description_vector)
 
-    # Travel category
-    travel_keywords = [
-        "uber",
-        "ola",
-        "bus",
-        "train",
-        "flight"
-    ]
+    return prediction[0]
 
-    # Shopping category
-    shopping_keywords = [
-        "amazon",
-        "flipkart",
-        "shopping",
-        "clothes"
-    ]
+# def categorize_transaction(description):
 
-    # Check food keywords
-    for word in food_keywords:
-        if word in description:
-            return "Food"
+#     description = description.lower()
 
-    # Check travel keywords
-    for word in travel_keywords:
-        if word in description:
-            return "Travel"
+#     # Food category
+#     food_keywords = [
+#         "swiggy",
+#         "zomato",
+#         "restaurant",
+#         "food",
+#         "pizza",
+#         "burger"
+#     ]
 
-    # Check shopping keywords
-    for word in shopping_keywords:
-        if word in description:
-            return "Shopping"
+#     # Travel category
+#     travel_keywords = [
+#         "uber",
+#         "ola",
+#         "bus",
+#         "train",
+#         "flight"
+#     ]
 
-    return "Others"
+#     # Shopping category
+#     shopping_keywords = [
+#         "amazon",
+#         "flipkart",
+#         "shopping",
+#         "clothes"
+#     ]
+
+#     # Check food keywords
+#     for word in food_keywords:
+#         if word in description:
+#             return "Food"
+
+#     # Check travel keywords
+#     for word in travel_keywords:
+#         if word in description:
+#             return "Travel"
+
+#     # Check shopping keywords
+#     for word in shopping_keywords:
+#         if word in description:
+#             return "Shopping"
+
+#     return "Others"
