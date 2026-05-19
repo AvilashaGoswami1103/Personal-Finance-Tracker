@@ -79,5 +79,25 @@ AI + Analytics Logic
      ↓
 Response Returned
 
+##Current Architecture:
+Client/User
+     ↓
+FastAPI Routes
+     ↓
+Pydantic Validation
+     ↓
+AI Categorization Service
+     ↓
+Analytics Service
+     ↓
+SQLAlchemy ORM
+     ↓
+SQLite Database
 
+Next phase:
+Real NLP pipeline integrated directly into backend APIs: 
+models/train_model.py: Built an NLP-based transaction categorization engine using TF-IDF and Logistic Regression integrated into a FastAPI backend.
+
+Next phase: Spending Prediction Engine 
+Method: Moving Average forecasting (Time-series prediction)
 
