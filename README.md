@@ -94,10 +94,35 @@ SQLAlchemy ORM
      ↓
 SQLite Database
 
-Next phase:
+Next phase implemented:
 Real NLP pipeline integrated directly into backend APIs: 
 models/train_model.py: Built an NLP-based transaction categorization engine using TF-IDF and Logistic Regression integrated into a FastAPI backend.
 
-Next phase: Spending Prediction Engine 
-Method: Moving Average forecasting (Time-series prediction)
+Spending Prediction Engine 
+Method used: Moving Average forecasting (Time-series prediction)
+🎯 GOAL
+Predict:
+future monthly spending
+category-wise future trends
+estimated next expenses
+
+Forecasting pipeline:
+Historical Transactions
+        ↓
+Feature Aggregation
+        ↓
+Prediction Model
+        ↓
+Forecast Output
+
+Next phase: Full interactive finance dashboard, using streamlit frontend
+| Feature            | UI Component      |
+| ------------------ | ----------------- |
+| Add transactions   | Form              |
+| View transactions  | Table             |
+| Category analytics | Pie chart         |
+| Spending forecast  | Cards/graphs      |
+| ML predictions     | Real-time display |
+
+
 
