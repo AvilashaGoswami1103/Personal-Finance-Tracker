@@ -4,7 +4,7 @@ from pydantic import BaseModel    # pydantic used for data validation, data pars
 from typing import List    # imports python type hints used for List[str]
 from backend.services.analytics import calculate_analytics    # Imports your custom function from analytics.py
 from backend.services.categorization import categorize_transaction
-from backend.services.prediction import predict_spending
+from backend.services.prediction import predict_future_spending
 
 from backend.database.db import engine
 from backend.database.db import Base
@@ -127,15 +127,17 @@ def get_prediction():
 
     transactions = db.query(TransactionDB).all()
 
-    prediction = predict_spending([
+    transaction_data = [
+
         {
             "amount": t.amount,
-            "category": t.category,
-            "description": t.description
+            "description": t.description,
+            "category": t.category
         }
+
         for t in transactions
-    ])
+    ]
 
     db.close()
 
-    return prediction
+    return predict_future_spending(transaction_data)
