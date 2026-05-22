@@ -124,5 +124,23 @@ Next phase: Full interactive finance dashboard, using streamlit frontend
 | Spending forecast  | Cards/graphs      |
 | ML predictions     | Real-time display |
 
+Libraries used: 
+| Library    | Purpose            |
+| ---------- | ------------------ |
+| streamlit  | Frontend dashboard |
+| requests   | Call FastAPI APIs  |
+| pandas     | Data handling      |
+| matplotlib | Charts             |
+
+| Component             | Visualization |
+| --------------------- | ------------- |
+| Total spending        | KPI metric    |
+| Predicted spending    | KPI metric    |
+| Category breakdown    | Pie chart     |
+| Transactions          | Table         |
+| Spending per category | Bar chart     |
+
+
+
 
 
