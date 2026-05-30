@@ -11,6 +11,8 @@ from backend.database.db import Base
 from backend.database.db import SessionLocal
 
 from backend.models.transaction_model import TransactionDB
+from backend.models.user_model import UserDB
+from backend.utils.security import hash_password
 app = FastAPI()    # Creates your API application object.
 Base.metadata.create_all(bind=engine)
 
@@ -21,7 +23,9 @@ transactions_db = []    # A Python list acting as a fake database
 class Transaction(BaseModel):
     amount: float
     description: str
-
+class User(BaseModel):
+    username: str
+    password: str
 # REST API
 
 # # Route 1: Add transaction
@@ -141,3 +145,45 @@ def get_prediction():
     db.close()
 
     return predict_future_spending(transaction_data)
+
+@app.post("/register")
+def register_user(user: User):
+
+    db = SessionLocal()
+
+    existing_user = db.query(UserDB).filter(
+        UserDB.username == user.username
+    ).first()
+
+    if existing_user:
+
+        db.close()
+
+        return {
+            "message":
+            "Username already exists"
+        }
+
+    hashed_password = hash_password(
+        user.password
+    )
+
+    new_user = UserDB(
+
+        username=user.username,
+
+        password_hash=hashed_password
+    )
+
+    db.add(new_user)
+
+    db.commit()
+
+    db.refresh(new_user)
+
+    db.close()
+
+    return {
+        "message":
+        "User registered successfully"
+    }
