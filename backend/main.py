@@ -1,6 +1,7 @@
-from fastapi import FastAPI    # Imports the FastAPI class from the FastAPI library
+from fastapi import FastAPI, Header, HTTPException    # Imports the FastAPI class from the FastAPI library
 from pydantic import BaseModel    # pydantic used for data validation, data parsing, type checking
 # suppose user sends amount = "hello", pydantic ensures that the amount must be float
+
 from typing import List    # imports python type hints used for List[str]
 from backend.services.analytics import calculate_analytics    # Imports your custom function from analytics.py
 from backend.services.categorization import categorize_transaction
@@ -14,6 +15,8 @@ from backend.models.transaction_model import TransactionDB
 from backend.models.user_model import UserDB
 from backend.utils.security import hash_password
 from backend.utils.security import verify_password
+from backend.utils.security import create_access_token
+from backend.utils.security import verify_token
 app = FastAPI()    # Creates your API application object.
 Base.metadata.create_all(bind=engine)
 
@@ -233,7 +236,16 @@ def login_user(
 
     db.close()
 
+    access_token = create_access_token(
+        {
+            "sub": user.username
+        }
+    )
+
     return {
-        "message":
-        "Login successful"
+
+        "access_token": access_token,
+
+        "token_type": "bearer"
     }
+
