@@ -13,6 +13,7 @@ from backend.database.db import SessionLocal
 from backend.models.transaction_model import TransactionDB
 from backend.models.user_model import UserDB
 from backend.utils.security import hash_password
+from backend.utils.security import verify_password
 app = FastAPI()    # Creates your API application object.
 Base.metadata.create_all(bind=engine)
 
@@ -24,6 +25,9 @@ class Transaction(BaseModel):
     amount: float
     description: str
 class User(BaseModel):
+    username: str
+    password: str
+class LoginRequest(BaseModel):
     username: str
     password: str
 # REST API
@@ -186,4 +190,50 @@ def register_user(user: User):
     return {
         "message":
         "User registered successfully"
+    }
+
+@app.post("/login")
+def login_user(
+    login_data: LoginRequest
+):
+
+    db = SessionLocal()
+
+    user = db.query(UserDB).filter(
+        UserDB.username ==
+        login_data.username
+    ).first()
+
+    # SELECT *
+    # FROM users
+    # WHERE username='...'
+
+    if not user:
+
+        db.close()
+
+        return {
+            "message":
+            "Invalid username or password"
+        }
+
+    valid_password = verify_password(
+        login_data.password,
+        user.password_hash
+    )
+
+    if not valid_password:
+
+        db.close()
+
+        return {
+            "message":
+            "Invalid username or password"
+        }
+
+    db.close()
+
+    return {
+        "message":
+        "Login successful"
     }

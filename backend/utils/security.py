@@ -19,3 +19,13 @@ def hash_password(password):    # function that takes a plain-text password as i
     # Returns encrypted hash (e.g., "$2b$12$...")
     # One-way encryption: Cannot reverse the hash to get original password.
     # Each time you hash the same password, you get a different hash (due to random salt).
+
+def verify_password(
+    plain_password,
+    hashed_password
+):
+
+    return pwd_context.verify(
+        plain_password,
+        hashed_password
+    )
