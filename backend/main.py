@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Header, HTTPException    # Imports the FastAPI class from the FastAPI library
+from fastapi import FastAPI, Header, Depends, HTTPException    # Imports the FastAPI class from the FastAPI library
 from pydantic import BaseModel    # pydantic used for data validation, data parsing, type checking
 # suppose user sends amount = "hello", pydantic ensures that the amount must be float
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from typing import List    # imports python type hints used for List[str]
 from backend.services.analytics import calculate_analytics    # Imports your custom function from analytics.py
@@ -33,38 +34,6 @@ class User(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
-# REST API
-
-# # Route 1: Add transaction
-# @app.post("/add_transaction")    # API route - Create an API endpoint
-# # POST is used to send data, create new reocrds
-# # FastAPI registers: "/add_transaction"
-# def add_transaction(transaction: Transaction):
-#     transactions_db.append(transaction.dict())  # ✅ convert to dict
-#     # Converts Pydantic object → Python dictionary
-#     return {"message": "Transaction added successfully"}
-#     # FastAPI automatically converts Python dict → JSON response and send back to browser
-
-# @app.post("/add_transaction")
-# def add_transaction(transaction: Transaction):
-
-#     predicted_category = categorize_transaction(
-#         transaction.description
-#     )
-
-#     transaction_data = {
-#         "amount": transaction.amount,
-#         "description": transaction.description,
-#         "category": predicted_category
-#     }
-
-#     transactions_db.append(transaction_data)
-
-#     return {
-#         "message": "Transaction added successfully",
-#         "predicted_category": predicted_category
-#     }
-
 
 @app.post("/add_transaction")
 def add_transaction(transaction: Transaction):
@@ -197,55 +166,61 @@ def register_user(user: User):
 
 @app.post("/login")
 def login_user(
-    login_data: LoginRequest
+    form_data: OAuth2PasswordRequestForm = Depends()  # ← reads form fields
 ):
-
     db = SessionLocal()
 
     user = db.query(UserDB).filter(
-        UserDB.username ==
-        login_data.username
+        UserDB.username == form_data.username  # ← form_data.username
     ).first()
 
-    # SELECT *
-    # FROM users
-    # WHERE username='...'
-
     if not user:
-
         db.close()
-
-        return {
-            "message":
-            "Invalid username or password"
-        }
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password"
+        )
 
     valid_password = verify_password(
-        login_data.password,
+        form_data.password,        # ← form_data.password
         user.password_hash
     )
 
     if not valid_password:
-
         db.close()
-
-        return {
-            "message":
-            "Invalid username or password"
-        }
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password"
+        )
 
     db.close()
 
-    access_token = create_access_token(
-        {
-            "sub": user.username
-        }
-    )
+    access_token = create_access_token({"sub": user.username})
 
     return {
-
         "access_token": access_token,
-
         "token_type": "bearer"
     }
 
+from typing import Annotated
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="login"
+)
+
+@app.get("/profile")
+def get_profile(
+    token: str = Depends(oauth2_scheme)
+):
+
+    username = verify_token(token)
+
+    if username is None:
+
+        return {
+            "message": "Invalid token"
+        }
+
+    return {
+        "username": username
+    }
