@@ -21,9 +21,6 @@ from backend.utils.security import verify_token
 app = FastAPI()    # Creates your API application object.
 Base.metadata.create_all(bind=engine)
 
-# Temporary in-memory storage
-transactions_db = []    # A Python list acting as a fake database
-
 # Data model    Defines the structure of incoming data: a request schema
 class Transaction(BaseModel):
     amount: float
@@ -31,12 +28,43 @@ class Transaction(BaseModel):
 class User(BaseModel):
     username: str
     password: str
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="login"
+)
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme)
+):
+
+    username = verify_token(token)
+
+    if username is None:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
+
+    db = SessionLocal()
+
+    user = db.query(UserDB).filter(
+        UserDB.username == username
+    ).first()
+
+    db.close()
+
+    return user
 
 @app.post("/add_transaction")
-def add_transaction(transaction: Transaction):
+def add_transaction(
+
+    transaction: Transaction,
+
+    current_user: UserDB = Depends(
+        get_current_user
+    )
+):
 
     predicted_category = categorize_transaction(
         transaction.description
@@ -44,11 +72,16 @@ def add_transaction(transaction: Transaction):
 
     db = SessionLocal()     # opens a session connected to our SQLite database
 
-    new_transaction = TransactionDB(    # Creates a new row (TransactionDB is your ORM model mapped to a table)
-        amount=transaction.amount,
-        description=transaction.description,
-        category=predicted_category
-    )
+    new_transaction = TransactionDB(
+
+    amount=transaction.amount,
+
+    description=transaction.description,
+
+    category=predicted_category,
+
+    user_id=current_user.id
+)
 
     db.add(new_transaction)     # stage the new row
 
@@ -65,12 +98,20 @@ def add_transaction(transaction: Transaction):
 
 # Route 2: Get all transactions
 @app.get("/transactions")
-def get_transactions():
+def get_transactions(
+    current_user: UserDB = Depends(
+        get_current_user
+    )
+):
 
     db = SessionLocal()     # open a session connected to SQLite database
 
-    transactions = db.query(TransactionDB).all()
-    # queries all rows from the transactions table 
+    transactions = db.query(
+    TransactionDB
+).filter(
+    TransactionDB.user_id ==
+    current_user.id
+).all()
 
     db.close()
 
@@ -79,17 +120,28 @@ def get_transactions():
 
 # Route 3: Get analytics
 @app.get("/analytics")
-def get_analytics():
+def get_analytics(
+
+    current_user: UserDB = Depends(
+        get_current_user
+    )
+):
+    
     # return calculate_analytics(transactions_db)    #Passes all transactions into calculate_analytics()
     db = SessionLocal()
 
-    transactions = db.query(TransactionDB).all()
+    transactions = db.query(
+    TransactionDB
+).filter(
+    TransactionDB.user_id ==
+    current_user.id
+).all()
 
     analytics = calculate_analytics([
         {
-            "amount": t.amount,
-            "category": t.category,
-            "description": t.description
+                "amount": t.amount,
+                "category": t.category,
+                "description": t.description
         }
         for t in transactions
     ])
@@ -101,11 +153,21 @@ def get_analytics():
     return analytics
 
 @app.get("/prediction")
-def get_prediction():
+def get_prediction(
+
+    current_user: UserDB = Depends(
+        get_current_user
+    )
+):
 
     db = SessionLocal()
 
-    transactions = db.query(TransactionDB).all()
+    transactions = db.query(
+    TransactionDB
+).filter(
+    TransactionDB.user_id ==
+    current_user.id
+).all()
 
     transaction_data = [
 
@@ -207,6 +269,29 @@ from typing import Annotated
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="login"
 )
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme)
+):
+
+    username = verify_token(token)
+
+    if username is None:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
+
+    db = SessionLocal()
+
+    user = db.query(UserDB).filter(
+        UserDB.username == username
+    ).first()
+
+    db.close()
+
+    return user
 
 @app.get("/profile")
 def get_profile(

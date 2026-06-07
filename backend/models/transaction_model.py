@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, Float, String
 from backend.database.db import Base
+from sqlalchemy import ForeignKey
 
 class TransactionDB(Base):
 
@@ -12,3 +13,8 @@ class TransactionDB(Base):
     description = Column(String)
 
     category = Column(String)
+
+    user_id = Column(
+    Integer,
+    ForeignKey("users.id")
+)
